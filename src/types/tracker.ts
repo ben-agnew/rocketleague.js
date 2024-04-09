@@ -1,3 +1,5 @@
+import { Divisions, TPlaylists, Ranks } from './internal';
+
 export type TrackerPlatformInfo = {
     platformSlug: string;
     platformUserId: string;
@@ -34,57 +36,101 @@ export type TrackerMetadata = {
     currentSeason: number;
 };
 
-type SegmentStat = {
+type SegmentStatsBase = {
     rank: number | unknown | null;
     percentile: unknown | null;
     displayName: string;
     displayCategory: string;
     category: string;
     description: unknown | null;
-    metadata: {
-        name?: string;
-        iconUrl?: string;
-    };
-    value: number | string;
+    value: number;
     displayValue: string;
     displayType: string;
 };
 
+type SegmentStatsTier = SegmentStatsBase & {
+    metadata: {
+        iconUrl: string;
+        name: Ranks;
+    };
+};
+
+type SegmentStatsDivision = SegmentStatsBase & {
+    metadata: {
+        deltaDown: number | null | undefined;
+        deltaUp: number | null | undefined;
+        name: Divisions;
+    };
+};
+
+type SegmentStatsWinStreak = SegmentStatsBase & {
+    metadata: {
+        type: 'win' | 'loss';
+    };
+};
+
+type SegmentStatsRating = SegmentStatsBase & {
+    metadata: {
+        iconUrl: string;
+        tierName: Ranks;
+    };
+};
+
+type SegmentStatsPeakRating = SegmentStatsBase & {
+    metadata: {
+        iconUrl: string;
+        tierName: Ranks;
+    };
+    value: number | null;
+};
+
 export type SegmentOverviewStats = {
-    wins: SegmentStat;
-    goals: SegmentStat;
-    mVPs: SegmentStat;
-    saves: SegmentStat;
-    assists: SegmentStat;
-    shots: SegmentStat;
-    goalShotRatio: SegmentStat;
-    score: SegmentStat;
-    seasonRewardLevel: SegmentStat;
-    seasonRewardWins: SegmentStat;
-    tRNRating: SegmentStat;
+    wins: SegmentStatsBase;
+    goals: SegmentStatsBase;
+    mVPs: SegmentStatsBase;
+    saves: SegmentStatsBase;
+    assists: SegmentStatsBase;
+    shots: SegmentStatsBase;
+    goalShotRatio: SegmentStatsBase;
+    score: SegmentStatsBase;
+    seasonRewardLevel: SegmentStatsBase;
+    seasonRewardWins: SegmentStatsBase;
+    tRNRating: SegmentStatsBase;
 };
 
 export type SegmentPlaylistStats = {
-    tier: SegmentStat;
-    division: SegmentStat;
-    matchesPlayed: SegmentStat;
-    winStreak: SegmentStat;
-    rating: SegmentStat;
-    peakRating: SegmentStat;
+    tier: SegmentStatsTier;
+    division: SegmentStatsDivision;
+    matchesPlayed: SegmentStatsBase;
+    winStreak: SegmentStatsWinStreak;
+    rating: SegmentStatsRating;
+    peakRating: SegmentStatsPeakRating;
 };
 
 export type Segments = {
-    type: 'overview' | 'playlist';
     attributes?: {
         playlistId: number;
         season: number;
         key?: string | null;
     };
-    metadata?: {
-        name: string;
-    };
-    stats: SegmentOverviewStats | SegmentPlaylistStats;
+
     expiryDate: string;
+} & (SegmentsOverview | SegmentsPlaylist);
+
+export type SegmentsOverview = {
+    type: 'overview';
+    stats: SegmentOverviewStats;
+    metadata: {
+        name: 'LifeTime';
+    };
+};
+
+export type SegmentsPlaylist = {
+    type: 'playlist';
+    stats: SegmentPlaylistStats;
+    metadata: {
+        name: TPlaylists;
+    };
 };
 
 export type TrackerResponse = {
